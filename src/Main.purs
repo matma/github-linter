@@ -10,11 +10,10 @@ import Data.Foldable (foldMap)
 
 import Control.Monad.Eff.Console
 
-
 main = do
   server <- createServer respond -- (1)
   listen server 8080 $ void do   -- (2)
     log "Server is listening!"
   where
   respond req res = do           -- (3)
-    log ( "Incoming: " <> requestMethod req <> " " <> requestURL req)
+    log "Incoming request"
