@@ -11,9 +11,13 @@ import Data.Foldable (foldMap)
 import Control.Monad.Eff.Console
 
 main = do
-  server <- createServer respond -- (1)
-  listen server 8080 $ void do   -- (2)
-    log "Server is listening!"
+  server <- createServer respond
+  listen server 8080 (return unit)
   where
-  respond req res = do           -- (3)
-    log "Incoming request"
+  respond req res = do
+    setStatus (requestMethod req) res
+    end (responseAsStream res) (return unit)
+
+    where
+    setStatus method res | method == "POST" = setStatusCode res 200
+                         | otherwise        = setStatusCode res 404
