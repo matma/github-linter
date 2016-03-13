@@ -4,9 +4,6 @@ import Prelude
 
 import Node.HTTP
 import Node.Stream
-import Node.Encoding
-
-import Data.Foldable (foldMap)
 
 import Control.Monad.Eff.Console
 
@@ -15,9 +12,11 @@ main = do
   listen server 8080 (return unit)
   where
   respond req res = do
-    setStatus (requestMethod req) res
-    end (responseAsStream res) (return unit)
-
-    where
-    setStatus method res | method == "POST" = setStatusCode res 200
-                         | otherwise        = setStatusCode res 404
+    let method = requestMethod req
+    case method of
+      "POST" -> do
+         setStatusCode res 200
+         void $ pipe (requestAsStream req) (responseAsStream res)
+      _     -> do
+         setStatusCode res 405
+         end (responseAsStream res) (return unit)
